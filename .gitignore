@@ -1,0 +1,47 @@
+# Environment variables
+.env
+
+# Added by dev
+.venv/
+docs/*
+docling_models/*
+eval_results/*
+backend/*-test-output*/
+backend/embedding-preflight-output*/
+backend/parsed-test-output*/
+backend/structural-extraction-test/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local storage
+storage/uploads/*
+storage/extracted/*
+storage/faiss/*
+storage/generated/*
+storage/temp/*
+storage/inspection/*
+storage/parsed/*
+storage/extracted_raw/*
+
+# Keep directories
+!storage/uploads/.gitkeep
+!storage/extracted/.gitkeep
+!storage/faiss/.gitkeep
+!storage/generated/.gitkeep
+!storage/temp/.gitkeep
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log

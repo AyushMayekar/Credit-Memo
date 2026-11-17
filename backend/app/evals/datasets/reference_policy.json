@@ -1,0 +1,22 @@
+{
+  "documents": [
+    "Goodwin-Directors-Report-2023.txt",
+    "Goodwin-Directors-Report-2024.txt",
+    "Goodwin-Interim-Report-2024.txt"
+  ],
+  "excluded_pages": {
+    "Goodwin-Directors-Report-2024.txt": [
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50
+    ]
+  },
+  "old_html_is_gold": false
+}

@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>{{ memo.report_metadata.report_title }}</title>
+
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: #f4f4f4;
+    }
+
+    body {
+      width: min(100%, 1000px);
+      margin: 0 auto;
+      padding: 24px;
+      background: #ffffff;
+      color: #333333;
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+      color: #333333;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      text-align: center;
+      font-size: 24pt;
+      line-height: 1.25;
+    }
+
+    h2 {
+      margin: 30px 0 12px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #333333;
+      font-size: 16pt;
+      line-height: 1.3;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      margin: 20px 0 8px;
+      font-size: 13pt;
+      line-height: 1.35;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    h4 {
+      margin: 16px 0 6px;
+      font-size: 11.5pt;
+      line-height: 1.35;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    ul,
+    ol {
+      margin: 10px 0;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    p,
+    li,
+    td,
+    th {
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border: 1px solid #333333;
+      vertical-align: top;
+    }
+
+    th {
+      background: #e2e2e2;
+      text-align: left;
+    }
+
+    tbody tr {
+      text-align: right;
+    }
+
+    tbody tr td:first-child {
+      text-align: left;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .report-details {
+      margin: 0 0 28px;
+      text-align: center;
+      color: #555555;
+    }
+
+    .section {
+      width: 100%;
+    }
+
+    .section-opening {
+      break-inside: auto;
+      page-break-inside: auto;
+    }
+
+    .subsection {
+      break-inside: auto;
+      page-break-inside: auto;
+    }
+
+    .not-disclosed {
+      color: #666666;
+      font-style: italic;
+    }
+
+    .metric-status {
+      text-transform: capitalize;
+    }
+
+    .credit-item {
+      margin: 12px 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .credit-item h3 {
+      margin-bottom: 4px;
+    }
+
+    .credit-item-meta {
+      color: #555555;
+      font-size: 9.5pt;
+      text-transform: capitalize;
+    }
+
+    .recommendation-status {
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+
+    @media screen and (max-width: 760px) {
+      body {
+        padding: 16px;
+        font-size: 10.5pt;
+      }
+
+      h1 {
+        font-size: 20pt;
+      }
+
+      h2 {
+        font-size: 15pt;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+        table-layout: auto;
+      }
+    }
+
+    @media print {
+      html {
+        background: #ffffff;
+      }
+
+      body {
+        width: auto;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5 {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      table {
+        display: table;
+        overflow: visible;
+      }
+
+      .credit-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  {% macro narrative(value) %}
+    {% if value and value.status == "available" and value.text %}
+      <p>{{ value.text }}</p>
+    {% elif value %}
+      <p class="not-disclosed">
+        {{ value.status | replace("_", " ") | title }}
+
+        {% if value.caveats %}
+          : {{ value.caveats | join("; ") }}
+        {% endif %}
+      </p>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro metrics_table(metrics) %}
+    {% if metrics %}
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Period</th>
+            <th>Value</th>
+            <th>Unit</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for metric in metrics %}
+            <tr>
+              <td>
+                {{
+                  metric.metric_name
+                  | replace("_", " ")
+                  | title
+                }}
+              </td>
+
+              <td>{{ metric.period or "-" }}</td>
+
+              <td>
+                {% if metric.value is not none %}
+                  {{ metric.value }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+
+              <td>{{ metric.unit or "-" }}</td>
+
+              <td class="metric-status">
+                {{ metric.status | replace("_", " ") }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro standard_section(number, value) %}
+    {% if value %}
+      <section class="section">
+        <div class="section-opening">
+          <h2>{{ number }}. {{ value.title }}</h2>
+          {{ narrative(value.summary) }}
+        </div>
+
+        {{ metrics_table(value.metrics) }}
+
+        {% for subsection in value.subsections %}
+          <div class="subsection">
+            <h3>{{ subsection.title }}</h3>
+            {{ narrative(subsection.narrative) }}
+            {{ metrics_table(subsection.metrics) }}
+          </div>
+        {% endfor %}
+      </section>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro item_section(number, value) %}
+    {% if value %}
+      <section class="section">
+        <div class="section-opening">
+          <h2>{{ number }}. {{ value.title }}</h2>
+          {{ narrative(value.summary) }}
+        </div>
+
+        {% if value["items"] %}
+          {% for item in value["items"] %}
+            <div class="credit-item">
+              <h3>{{ item.title }}</h3>
+
+              <p>{{ item.description }}</p>
+
+              {% if item.severity %}
+                <p class="credit-item-meta">
+                  Severity:
+                  {{ item.severity | replace("_", " ") }}
+                </p>
+              {% endif %}
+
+              {% if item.caveats %}
+                <ul>
+                  {% for caveat in item.caveats %}
+                    <li>{{ caveat }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="not-disclosed">
+            No information was disclosed.
+          </p>
+        {% endif %}
+      </section>
+    {% endif %}
+  {% endmacro %}
+
+  <h1>{{ memo.report_metadata.report_title }}</h1>
+
+  <div class="report-details">
+    <p>
+      {{ memo.report_metadata.period_label }}
+      |
+      Version {{ memo.report_metadata.memo_version }}
+    </p>
+
+    <p>
+      Application:
+      {{ memo.report_metadata.application_reference }}
+    </p>
+  </div>
+
+  {{ standard_section("1", memo.executive_summary) }}
+
+  {{ standard_section("2", memo.borrower_profile) }}
+
+  {{ standard_section("3", memo.facility_request) }}
+
+  {{ standard_section(
+    "4",
+    memo.business_and_industry_analysis
+  ) }}
+
+  {{ standard_section(
+    "5",
+    memo.management_ownership_governance
+  ) }}
+
+  <section class="section">
+    <div class="section-opening">
+      <h2>6. Financial Analysis</h2>
+      {{ narrative(memo.financial_analysis.summary) }}
+    </div>
+
+    {% if memo.financial_analysis.profitability %}
+      <div class="subsection">
+        <h3>6.1 Profitability</h3>
+
+        {{
+          narrative(
+            memo.financial_analysis.profitability.summary
+          )
+        }}
+
+        {{
+          metrics_table(
+            memo.financial_analysis.profitability.metrics
+          )
+        }}
+
+        {% for subsection in
+          memo.financial_analysis.profitability.subsections
+        %}
+          <h4>{{ subsection.title }}</h4>
+          {{ narrative(subsection.narrative) }}
+          {{ metrics_table(subsection.metrics) }}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if memo.financial_analysis.balance_sheet %}
+      <div class="subsection">
+        <h3>6.2 Balance Sheet Performance</h3>
+
+        {{
+          narrative(
+            memo.financial_analysis.balance_sheet.summary
+          )
+        }}
+
+        {{
+          metrics_table(
+            memo.financial_analysis.balance_sheet.metrics
+          )
+        }}
+
+        {% for subsection in
+          memo.financial_analysis.balance_sheet.subsections
+        %}
+          <h4>{{ subsection.title }}</h4>
+          {{ narrative(subsection.narrative) }}
+          {{ metrics_table(subsection.metrics) }}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if memo.financial_analysis.cash_flow %}
+      <div class="subsection">
+        <h3>6.3 Cash Flow Analysis</h3>
+
+        {{
+          narrative(
+            memo.financial_analysis.cash_flow.summary
+          )
+        }}
+
+        {{
+          metrics_table(
+            memo.financial_analysis.cash_flow.metrics
+          )
+        }}
+
+        {% for subsection in
+          memo.financial_analysis.cash_flow.subsections
+        %}
+          <h4>{{ subsection.title }}</h4>
+          {{ narrative(subsection.narrative) }}
+          {{ metrics_table(subsection.metrics) }}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if memo.financial_analysis.ratios %}
+      <div class="subsection">
+        <h3>6.4 Financial Ratios</h3>
+        {{ metrics_table(memo.financial_analysis.ratios) }}
+      </div>
+    {% endif %}
+  </section>
+
+  {{ standard_section(
+    "7",
+    memo.existing_debt_and_repayment_capacity
+  ) }}
+
+  {{ standard_section(
+    "8",
+    memo.security_and_collateral
+  ) }}
+
+  {{ item_section("9", memo.key_credit_strengths) }}
+
+  {{ item_section("10", memo.key_credit_risks) }}
+
+  {{ item_section("11", memo.risk_mitigants) }}
+
+  {{ standard_section(
+    "12",
+    memo.policy_compliance_and_exceptions
+  ) }}
+
+  {{ standard_section(
+    "13",
+    memo.proposed_terms_and_conditions
+  ) }}
+
+  <section class="section">
+    <div class="section-opening">
+      <h2>14. Credit Recommendation</h2>
+
+      <p class="recommendation-status">
+        {{
+          memo.credit_recommendation.recommendation_status
+          | replace("_", " ")
+        }}
+      </p>
+
+      {{ narrative(memo.credit_recommendation.rationale) }}
+    </div>
+
+    {% if
+      memo.credit_recommendation.recommended_amount
+      and
+      memo.credit_recommendation.recommended_amount.value
+      is not none
+    %}
+      <h3>Recommended Amount</h3>
+
+      <p>
+        {{
+          memo.credit_recommendation
+          .recommended_amount.value
+        }}
+        {{
+          memo.credit_recommendation
+          .recommended_amount.unit
+        }}
+      </p>
+    {% endif %}
+
+    {% if memo.credit_recommendation.conditions %}
+      <h3>Conditions</h3>
+
+      <ul>
+        {% for condition in
+          memo.credit_recommendation.conditions
+        %}
+          <li>{{ condition }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if memo.credit_recommendation.required_approvals %}
+      <h3>Required Approvals</h3>
+
+      <ul>
+        {% for approval in
+          memo.credit_recommendation.required_approvals
+        %}
+          <li>{{ approval }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if memo.credit_recommendation.unresolved_issues %}
+      <h3>Unresolved Issues</h3>
+
+      <ul>
+        {% for issue in
+          memo.credit_recommendation.unresolved_issues
+        %}
+          <li>{{ issue }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  <section class="section">
+    <div class="section-opening">
+      <h2>15. Missing Information and Quality Flags</h2>
+
+      <p>
+        <strong>Overall quality status:</strong>
+        {{
+          memo.missing_information_and_quality_flags
+          .overall_quality_status
+          | replace("_", " ")
+          | title
+        }}
+      </p>
+    </div>
+
+    {% if
+      memo.missing_information_and_quality_flags
+      .missing_information
+    %}
+      <h3>Missing Information</h3>
+
+      <ul>
+        {% for item in
+          memo.missing_information_and_quality_flags
+          .missing_information
+        %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if
+      memo.missing_information_and_quality_flags
+      .conflicts
+    %}
+      <h3>Conflicts</h3>
+
+      <ul>
+        {% for item in
+          memo.missing_information_and_quality_flags
+          .conflicts
+        %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if
+      memo.missing_information_and_quality_flags
+      .review_items
+    %}
+      <h3>Review Items</h3>
+
+      <ul>
+        {% for item in
+          memo.missing_information_and_quality_flags
+          .review_items
+        %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+</body>
+</html>

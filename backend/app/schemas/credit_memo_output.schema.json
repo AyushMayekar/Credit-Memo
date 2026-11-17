@@ -1,0 +1,821 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:universal-credit-memo:2.0.0",
+  "title": "Universal Credit Memo",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_metadata",
+    "borrower_profile",
+    "facility_request",
+    "executive_summary",
+    "business_and_industry_analysis",
+    "management_ownership_governance",
+    "financial_analysis",
+    "existing_debt_and_repayment_capacity",
+    "security_and_collateral",
+    "key_credit_strengths",
+    "key_credit_risks",
+    "risk_mitigants",
+    "policy_compliance_and_exceptions",
+    "proposed_terms_and_conditions",
+    "credit_recommendation",
+    "missing_information_and_quality_flags",
+    "source_register"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "report_metadata": {
+      "$ref": "#/$defs/ReportMetadata"
+    },
+    "borrower_profile": {
+      "$ref": "#/$defs/Section"
+    },
+    "facility_request": {
+      "$ref": "#/$defs/FacilitySection"
+    },
+    "executive_summary": {
+      "$ref": "#/$defs/ExecutiveSummary"
+    },
+    "business_and_industry_analysis": {
+      "$ref": "#/$defs/BusinessSection"
+    },
+    "management_ownership_governance": {
+      "$ref": "#/$defs/Section"
+    },
+    "financial_analysis": {
+      "$ref": "#/$defs/FinancialSection"
+    },
+    "existing_debt_and_repayment_capacity": {
+      "$ref": "#/$defs/Section"
+    },
+    "security_and_collateral": {
+      "$ref": "#/$defs/Section"
+    },
+    "key_credit_strengths": {
+      "$ref": "#/$defs/ItemSection"
+    },
+    "key_credit_risks": {
+      "$ref": "#/$defs/ItemSection"
+    },
+    "risk_mitigants": {
+      "$ref": "#/$defs/ItemSection"
+    },
+    "policy_compliance_and_exceptions": {
+      "$ref": "#/$defs/Section"
+    },
+    "proposed_terms_and_conditions": {
+      "$ref": "#/$defs/Section"
+    },
+    "credit_recommendation": {
+      "$ref": "#/$defs/Recommendation"
+    },
+    "missing_information_and_quality_flags": {
+      "$ref": "#/$defs/QualitySection"
+    },
+    "source_register": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Source"
+      }
+    },
+    "generation_metadata": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "Status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "not_disclosed",
+        "not_applicable",
+        "conflicting",
+        "pending_calculation",
+        "pending_review"
+      ]
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "page_start",
+        "page_end",
+        "section",
+        "locator"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page_start": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "page_end": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "section": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "locator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Narrative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "text",
+        "analysis_type",
+        "evidence",
+        "caveats"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "analysis_type": {
+          "type": "string",
+          "enum": [
+            "source_summary",
+            "derived_analysis",
+            "analyst_inference",
+            "not_applicable"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "caveats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric_name",
+        "period",
+        "status",
+        "value",
+        "unit",
+        "basis",
+        "formula",
+        "evidence",
+        "notes"
+      ],
+      "properties": {
+        "metric_name": {
+          "type": "string"
+        },
+        "period": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "basis": {
+          "type": "string",
+          "enum": [
+            "source_reported",
+            "calculated",
+            "analyst_estimate",
+            "not_applicable"
+          ]
+        },
+        "formula": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_key",
+        "title",
+        "status",
+        "summary",
+        "subsections",
+        "metrics",
+        "quality_flags"
+      ],
+      "properties": {
+        "section_key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "summary": {
+          "$ref": "#/$defs/Narrative"
+        },
+        "subsections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Subsection"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Subsection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "title",
+        "status",
+        "narrative",
+        "metrics"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "narrative": {
+          "$ref": "#/$defs/Narrative"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        }
+      }
+    },
+    "FacilitySection": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Section"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "ExecutiveSummary": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Section"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "BusinessSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_key",
+        "title",
+        "status",
+        "summary",
+        "subsections",
+        "metrics",
+        "quality_flags",
+        "operating_segments",
+        "geographic_revenue"
+      ],
+      "properties": {
+        "section_key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "summary": {
+          "$ref": "#/$defs/Narrative"
+        },
+        "subsections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Subsection"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "operating_segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Segment"
+          }
+        },
+        "geographic_revenue": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Geography"
+          }
+        }
+      }
+    },
+    "FinancialSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_key",
+        "title",
+        "status",
+        "summary",
+        "subsections",
+        "metrics",
+        "quality_flags",
+        "profitability",
+        "balance_sheet",
+        "cash_flow",
+        "ratios"
+      ],
+      "properties": {
+        "section_key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "summary": {
+          "$ref": "#/$defs/Narrative"
+        },
+        "subsections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Subsection"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profitability": {
+          "$ref": "#/$defs/Section"
+        },
+        "balance_sheet": {
+          "$ref": "#/$defs/Section"
+        },
+        "cash_flow": {
+          "$ref": "#/$defs/Section"
+        },
+        "ratios": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        }
+      }
+    },
+    "Segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "segment_id",
+        "segment_name",
+        "status",
+        "description",
+        "metrics"
+      ],
+      "properties": {
+        "segment_id": {
+          "type": "string"
+        },
+        "segment_name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "description": {
+          "$ref": "#/$defs/Narrative"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        }
+      }
+    },
+    "Geography": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "region_name",
+        "status",
+        "revenue",
+        "commentary"
+      ],
+      "properties": {
+        "region_name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "revenue": {
+          "$ref": "#/$defs/Metric"
+        },
+        "commentary": {
+          "$ref": "#/$defs/Narrative"
+        }
+      }
+    },
+    "ItemSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_key",
+        "title",
+        "status",
+        "summary",
+        "items",
+        "quality_flags"
+      ],
+      "properties": {
+        "section_key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "summary": {
+          "$ref": "#/$defs/Narrative"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CreditItem"
+          }
+        },
+        "quality_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "CreditItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "title",
+        "description",
+        "severity",
+        "linked_item_ids",
+        "evidence",
+        "caveats"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical",
+            "not_assessed"
+          ]
+        },
+        "linked_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "caveats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_key",
+        "title",
+        "status",
+        "recommendation_status",
+        "recommended_amount",
+        "rationale",
+        "conditions",
+        "required_approvals",
+        "unresolved_issues"
+      ],
+      "properties": {
+        "section_key": {
+          "const": "credit_recommendation"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "recommendation_status": {
+          "type": "string",
+          "enum": [
+            "RECOMMENDED",
+            "RECOMMENDED_WITH_CONDITIONS",
+            "NOT_RECOMMENDED",
+            "PENDING_INFORMATION",
+            "PENDING_ANALYST_REVIEW"
+          ]
+        },
+        "recommended_amount": {
+          "$ref": "#/$defs/Metric"
+        },
+        "rationale": {
+          "$ref": "#/$defs/Narrative"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_approvals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unresolved_issues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "QualitySection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "missing_information",
+        "conflicts",
+        "pending_calculations",
+        "review_items",
+        "overall_quality_status"
+      ],
+      "properties": {
+        "missing_information": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pending_calculations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "review_items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "overall_quality_status": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "usable_with_caveats",
+            "incomplete",
+            "requires_review"
+          ]
+        }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "document_id",
+        "document_name",
+        "document_type",
+        "reporting_period",
+        "page_start",
+        "page_end",
+        "section",
+        "locator"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "document_id": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "document_name": {
+          "type": "string"
+        },
+        "document_type": {
+          "type": "string"
+        },
+        "reporting_period": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "page_start": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "page_end": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "section": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "locator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "ReportMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report_title",
+        "generated_at",
+        "language",
+        "display_currency",
+        "period_label",
+        "application_reference",
+        "memo_version"
+      ],
+      "properties": {
+        "report_title": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "display_currency": {
+          "type": "string"
+        },
+        "period_label": {
+          "type": "string"
+        },
+        "application_reference": {
+          "type": "string"
+        },
+        "memo_version": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
