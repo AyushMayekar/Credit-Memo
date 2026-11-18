@@ -20,7 +20,12 @@ class RetrievalRequest:
 
 
 class MemoBatchRetriever:
-    """Retrieve child/table vectors and send at most two bounded contexts per batch."""
+    """Retrieve parents and matched tables for one memo batch.
+
+    The LLM receives only PARENT and TABLE evidence. Narrative children are
+    used to find parents and are never placed in the packet. Tables are kept
+    exactly as stored; nothing is trimmed.
+    """
 
     def __init__(self, retriever: ApplicationFaissRetriever) -> None:
         self.retriever = retriever
@@ -32,122 +37,79 @@ class MemoBatchRetriever:
         request: RetrievalRequest,
         batch,
     ) -> tuple[list[RetrievedEvidence], list[dict[str, Any]]]:
-        query = retrieval_query(
+        return self.search(request=request, query=batch.query, batch=batch)
+
+    def search(
+        self,
+        *,
+        request: RetrievalRequest,
+        query: str,
+        batch,
+    ) -> tuple[list[RetrievedEvidence], list[dict[str, Any]]]:
+        query_text = retrieval_query(
             borrower=request.borrower_name,
             application_reference=request.application_reference,
-            query=batch.query,
+            query=query,
             request_type=f"CREDIT_MEMO_{batch.key.upper()}",
         )
-
-        # `top_k` is the final number of distinct parent/table contexts.
-        # `candidate_k` only widens FAISS candidate inspection and does not
-        # increase the LLM prompt size.
-        candidates = self.retriever.search(
-            query_vector=self.embedder.embed_text(query),
+        raw = self.retriever.search(
+            query_vector=self.embedder.embed_text(query_text),
             application_id=request.application_id,
-            top_k=max(batch.top_k, 2),
+            top_k=min(int(batch.top_k), ApplicationFaissRetriever.MAX_PARENTS),
             candidate_k=batch.candidate_k,
         )
+        packet = [self.packet_entry(item) for item in raw]
+        return raw, packet
 
-        ranked = sorted(
-            candidates,
-            key=lambda item: (
-                0 if item.content_type in batch.preferred_types else 1,
-                -item.score,
-            ),
+    @classmethod
+    def packet_entry(cls, item: RetrievedEvidence) -> dict[str, Any]:
+        if item.content_type == "PARENT_SECTION":
+            return cls._parent_entry(item)
+        if item.content_type == "TABLE_DATA":
+            return cls._table_entry(item)
+        raise ValueError(
+            f"Unsupported retrieval evidence type: {item.content_type}"
         )
 
-        selected: list[RetrievedEvidence] = []
-        packet: list[dict[str, Any]] = []
-        seen_contexts: set[tuple[str, int]] = set()
+    @classmethod
+    def _parent_entry(cls, item: RetrievedEvidence) -> dict[str, Any]:
+        return {
+            "source_id": item.source_id,
+            "source_type": "PARENT",
+            "content_type": item.content_type,
+            "content_id": item.content_id,
+            "parent_content_id": item.content_id,
+            "chunk_id": item.chunk_id,
+            "document_id": item.metadata.get("document_id"),
+            "page": item.page_number,
+            "page_end": item.page_end,
+            "section": cls.clean_label(item.section_title),
+            "document_name": cls.document_name(item),
+            "text": (item.text or "").strip(),
+            "related_parents": item.related_parents,
+        }
 
-        for item in ranked:
-            context_key = (
-                (
-                    "PARENT",
-                    item.parent_content_id,
-                )
-                if item.parent_content_id is not None
-                else (
-                    item.content_type,
-                    item.content_id,
-                )
-            )
-            if context_key in seen_contexts:
-                continue
-
-            # For text vectors use the expanded parent. For table vectors use
-            # the normalized table itself, which is already self-contained.
-            context = (
-                item.context_text if item.content_type == "CHILD_CHUNK" else item.text
-            ).strip()
-            prepared = self._prepare(
-                context,
-                item.content_type,
-                batch.query,
-                batch.max_evidence_characters,
-            )
-            if prepared is None:
-                continue
-
-            selected.append(item)
-            seen_contexts.add(context_key)
-            packet.append(
-                {
-                    "source_id": self.source_id(item),
-                    "content_type": item.content_type,
-                    "page": item.page_number,
-                    "page_end": item.page_end,
-                    "section": self.clean_label(item.section_title),
-                    "document_name": self.document_name(item),
-                    "text": prepared,
-                    "retrieved_child_text": item.text.strip(),
-                    "parent_content_id": item.parent_content_id,
-                }
-            )
-            if len(packet) >= batch.top_k:
-                break
-
-        return selected, packet
-
-    @staticmethod
-    def _prepare(
-        text: str,
-        content_type: str,
-        query: str,
-        limit: int,
-    ) -> str | None:
-        if len(text) <= limit:
-            return text
-
-        # Narrative parents are never cut blindly. A parent that breaches the
-        # batch budget is skipped so citations never point to partial prose.
-        if content_type != "TABLE_DATA":
-            return None
-
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        if len(lines) < 3:
-            return None
-
-        terms = {token for token in re.findall(r"[a-zA-Z]{4,}", query.casefold())}
-        matching_rows = [
-            line for line in lines[2:] if any(term in line.casefold() for term in terms)
-        ]
-        chosen = lines[:2] + matching_rows
-        output: list[str] = []
-        size = 0
-        for line in chosen:
-            if size + len(line) + 1 > limit:
-                break
-            output.append(line)
-            size += len(line) + 1
-        return "\n".join(output) if len(output) > 2 else None
+    @classmethod
+    def _table_entry(cls, item: RetrievedEvidence) -> dict[str, Any]:
+        return {
+            "source_id": item.source_id,
+            "source_type": "TABLE",
+            "content_type": item.content_type,
+            "content_id": item.content_id,
+            "parent_content_id": item.parent_content_id,
+            "chunk_id": item.chunk_id,
+            "table_id": item.metadata.get("table_id"),
+            "document_id": item.metadata.get("document_id"),
+            "page": item.page_number,
+            "page_end": item.page_end,
+            "section": cls.clean_label(item.section_title),
+            "document_name": cls.document_name(item),
+            "text": (item.text or "").strip(),
+        }
 
     @staticmethod
     def source_id(item: RetrievedEvidence) -> str:
-        return (
-            f"DOC{item.metadata.get('document_id', 'X')}" f"-CONTENT-{item.content_id}"
-        )
+        return item.source_id
 
     @staticmethod
     def document_name(item: RetrievedEvidence) -> str:

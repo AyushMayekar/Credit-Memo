@@ -1,0 +1,25 @@
+{
+  "schema_version": "5.0",
+  "extraction_method": "standalone-docling-text-v5",
+  "processed_pages": [
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70
+  ],
+  "source_page_count": 108,
+  "item_count": 701,
+  "heading_count": 51,
+  "paragraph_count": 639,
+  "elapsed_seconds": 20.26,
+  "extraction_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\extraction-v5-output\\TEST\\GOODWIN-SAMPLE\\extraction.json",
+  "review_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\extraction-v5-output\\TEST\\GOODWIN-SAMPLE\\extraction_review.json",
+  "digest_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\extraction-v5-output\\TEST\\GOODWIN-SAMPLE\\extraction_digest.txt",
+  "status": "READY_FOR_INSPECTION"
+}

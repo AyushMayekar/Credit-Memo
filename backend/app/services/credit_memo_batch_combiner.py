@@ -34,7 +34,7 @@ class CreditMemoBatchCombiner:
         )[:6]
         source_ids = list(
             dict.fromkeys(sid for part in parts for sid in part.get("source_ids", []))
-        )[:8]
+        )
         caveats = list(
             dict.fromkeys(str(x) for part in parts for x in part.get("caveats", []))
         )[:3]

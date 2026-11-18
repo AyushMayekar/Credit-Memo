@@ -29,7 +29,6 @@ class Settings(BaseSettings):
     embedding_batch_size: int = 48
     embedding_batch_token_limit: int = 16000
     embedding_api_key: str
-    reranker_model: str = ""
     llm_model: str = "claude-sonnet-4-6-Dev"
     llm_api_key: str
     llm_base_url: str

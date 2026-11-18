@@ -25,7 +25,7 @@ with SessionLocal() as s:
         s.scalars(
             select(Document.id).where(
                 Document.application_id == app.id,
-                Document.extraction_status == "COMPLETED",
+                Document.extraction_status == "VALIDATED",
             )
         )
     )

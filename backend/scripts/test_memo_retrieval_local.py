@@ -45,7 +45,7 @@ def main() -> None:
             / f"{settings.faiss_index_name}.faiss"
         )
         retriever = MemoBatchRetriever(ApplicationFaissRetriever(session, index_path))
-        selected, packet = retriever.retrieve(
+        _, packet = retriever.retrieve(
             request=RetrievalRequest(
                 application.id,
                 application.application_reference,
@@ -63,25 +63,27 @@ def main() -> None:
             "contexts": [
                 {
                     "source_id": row["source_id"],
+                    "source_type": row["source_type"],
                     "content_type": row["content_type"],
                     "page": row["page"],
                     "page_end": row["page_end"],
                     "section": row["section"],
                     "parent_content_id": row["parent_content_id"],
                     "context_characters": len(row["text"]),
-                    "child_preview": row["retrieved_child_text"][:500],
-                    "context_preview": row["text"][:1200],
+                    "text_preview": row["text"][:1200],
+                    "related_parents": row.get("related_parents", []),
                 }
                 for row in packet
             ],
-            "distinct_contexts": len(
+            "parent_context_count": len(
                 {
-                    (
-                        row["content_type"],
-                        row["parent_content_id"] or selected[index].content_id,
-                    )
-                    for index, row in enumerate(packet)
+                    row["parent_content_id"]
+                    for row in packet
+                    if row["source_type"] == "PARENT"
                 }
+            ),
+            "table_context_count": sum(
+                1 for row in packet if row["source_type"] == "TABLE"
             ),
         }
         print(json.dumps(output, indent=2, ensure_ascii=False))

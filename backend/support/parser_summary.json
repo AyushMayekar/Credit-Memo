@@ -1,0 +1,22 @@
+{
+  "parser_version": "lightweight-structural-parser-v8.1",
+  "elapsed_seconds": 0.104,
+  "result": {
+    "extraction_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\extraction-v5-output\\TEST\\GOODWIN-SAMPLE\\extraction.json",
+    "output_directory": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\parser-v8-output\\TEST\\GOODWIN-SAMPLE",
+    "parsed_document_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\parser-v8-output\\TEST\\GOODWIN-SAMPLE\\parsed_document.json",
+    "parser_summary_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\parser-v8-output\\TEST\\GOODWIN-SAMPLE\\parser_summary.json",
+    "parser_digest_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\parser-v8-output\\TEST\\GOODWIN-SAMPLE\\parser_digest.txt",
+    "page_count": 10,
+    "included_page_count": 10,
+    "excluded_page_count": 0,
+    "section_count": 45,
+    "table_count": 12,
+    "accepted_record_count": 44,
+    "review_record_count": 6,
+    "rejected_record_count": 0,
+    "parser_status": "REVIEW_REQUIRED"
+  },
+  "review_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\parser-v8-output\\TEST\\GOODWIN-SAMPLE\\parser_review.json",
+  "table_failures": []
+}

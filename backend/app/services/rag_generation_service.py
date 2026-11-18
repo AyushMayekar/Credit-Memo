@@ -63,6 +63,11 @@ class RagGenerationService:
             query=query,
             request_type=request_type,
         )
+        route = state["route"]
+        if route in {"APP_HELP", "OUT_OF_SCOPE"}:
+            # Application-help and refusal paths deliberately do not touch
+            # PostgreSQL, FAISS, or the generation history table.
+            return GenerationResult(0, route, state["response"], [])
         evidence = state.get("evidence", [])
         sources = [
             {
@@ -72,6 +77,8 @@ class RagGenerationService:
                 "content_id": item.content_id,
                 "parent_content_id": item.parent_content_id,
                 "content_type": item.content_type,
+                "document_id": item.metadata.get("document_id"),
+                "chunk_id": item.chunk_id,
                 "page_number": item.page_number,
                 "page_end": item.page_end,
                 "section_title": item.section_title,
@@ -84,8 +91,8 @@ class RagGenerationService:
         record = RagGeneration(
             application_id=state["application_id"],
             request_type=request_type,
-            route=state["route"],
-            user_query=None,
+            route=route,
+            user_query=query if request_type == "USER_QUERY" else None,
             predefined_prompt_key=predefined_prompt_key,
             response_json=state["response"],
             source_snapshot=sources,

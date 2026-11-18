@@ -90,10 +90,9 @@ def main() -> None:
                     "page_number": item.page_number,
                     "page_end": item.page_end,
                     "section_title": item.section_title,
-                    "search_priority": item.metadata.get("search_priority"),
-                    "child_preview": item.text[:700],
-                    "parent_context_characters": len(item.context_text),
-                    "parent_preview": item.context_text[:1200],
+                    "chunk_id": item.chunk_id,
+                    "text_preview": item.text[:1200],
+                    "related_parents": item.related_parents,
                 }
                 for item in evidence
             ],

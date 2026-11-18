@@ -24,11 +24,13 @@ class MemoBatch:
     why_needed: str
     audience: str
     query: str
+    # Descriptive metadata only. Retrieval never filters or reranks by type;
+    # parent selection is FAISS similarity order.
     preferred_types: tuple[str, ...]
     output: BatchOutput
     top_k: int = 2
-    candidate_k: int = 40
-    max_evidence_characters: int = 6500
+    candidate_k: int = 24
+    max_retries: int = 1
     max_output_tokens: int = 900
 
 
@@ -113,7 +115,7 @@ BATCHES = (
         "revenue operating profit profit before tax profit after tax",
         ("TABLE_DATA",),
         FACTS_2,
-        max_evidence_characters=8000,
+        max_retries=3,
         max_output_tokens=1000,
     ),
     MemoBatch(
@@ -126,7 +128,7 @@ BATCHES = (
         "gross margin operating margin trading margin ROCE return on capital",
         ("TABLE_DATA", "CHILD_CHUNK"),
         FACTS_2,
-        max_evidence_characters=8000,
+        max_retries=3,
         max_output_tokens=1000,
     ),
     MemoBatch(
@@ -139,7 +141,7 @@ BATCHES = (
         "total assets total liabilities equity net assets balance sheet",
         ("TABLE_DATA",),
         FACTS_2,
-        max_evidence_characters=8000,
+        max_retries=3,
         max_output_tokens=1000,
     ),
     MemoBatch(
@@ -152,7 +154,7 @@ BATCHES = (
         "cash current assets current liabilities receivables payables working capital",
         ("TABLE_DATA",),
         FACTS_2,
-        max_evidence_characters=8000,
+        max_retries=3,
         max_output_tokens=1000,
     ),
     MemoBatch(
@@ -165,7 +167,7 @@ BATCHES = (
         "net cash operating activities operating cash flow",
         ("TABLE_DATA",),
         FACTS_2,
-        max_evidence_characters=8000,
+        max_retries=3,
         max_output_tokens=1000,
     ),
     MemoBatch(
@@ -178,7 +180,7 @@ BATCHES = (
         "capital expenditure investing activities financing activities debt drawdown",
         ("TABLE_DATA",),
         FACTS_2,
-        max_evidence_characters=8000,
+        max_retries=3,
         max_output_tokens=1000,
     ),
     MemoBatch(
@@ -191,7 +193,7 @@ BATCHES = (
         "total borrowings net debt cash unutilised facilities liquidity",
         ("TABLE_DATA", "CHILD_CHUNK"),
         FACTS_2,
-        max_evidence_characters=8000,
+        max_retries=3,
         max_output_tokens=1000,
     ),
     MemoBatch(
@@ -204,7 +206,7 @@ BATCHES = (
         "debt maturities contractual cash flows refinancing repayment capacity DSCR EBITDA",
         ("TABLE_DATA", "CHILD_CHUNK"),
         NARRATIVE_2,
-        max_evidence_characters=8000,
+        max_retries=3,
     ),
     MemoBatch(
         "existing_security",
@@ -216,6 +218,7 @@ BATCHES = (
         "secured against collateral guarantees charges debenture furnaces land",
         ("CHILD_CHUNK", "TABLE_DATA"),
         NARRATIVE_2,
+        max_retries=3,
     ),
     MemoBatch(
         "proposed_security",
@@ -227,6 +230,7 @@ BATCHES = (
         "proposed facility security collateral guarantee charge term sheet",
         ("CHILD_CHUNK",),
         NARRATIVE_2,
+        max_retries=3,
     ),
     MemoBatch(
         "credit_strengths",
@@ -238,6 +242,7 @@ BATCHES = (
         "credit strengths profitability cash flow liquidity diversification controls",
         ("CHILD_CHUNK", "TABLE_DATA"),
         ITEMS_2,
+        max_retries=3,
         max_output_tokens=1100,
     ),
     MemoBatch(
@@ -250,6 +255,7 @@ BATCHES = (
         "credit risks leverage liquidity refinancing concentration market compliance",
         ("CHILD_CHUNK", "TABLE_DATA"),
         ITEMS_2,
+        max_retries=3,
         max_output_tokens=1100,
     ),
     MemoBatch(
@@ -262,6 +268,7 @@ BATCHES = (
         "risk mitigants insurance hedging facilities controls stage payments",
         ("CHILD_CHUNK", "TABLE_DATA"),
         ITEMS_2,
+        max_retries=3,
         max_output_tokens=1100,
     ),
     MemoBatch(
@@ -274,6 +281,7 @@ BATCHES = (
         "credit policy exception covenant waiver approval threshold",
         ("CHILD_CHUNK",),
         NARRATIVE_2,
+        max_retries=3,
     ),
     MemoBatch(
         "proposed_terms",
@@ -285,5 +293,6 @@ BATCHES = (
         "proposed facility terms pricing repayment covenants conditions precedent",
         ("CHILD_CHUNK",),
         NARRATIVE_2,
+        max_retries=3,
     ),
 )

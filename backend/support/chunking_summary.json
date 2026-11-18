@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "elapsed_seconds": 0.0142,
+  "parent_count": 9,
+  "child_count": 38,
+  "table_chunk_count": 12,
+  "max_parent_tokens": 2610,
+  "max_child_tokens": 463,
+  "max_table_tokens": 762,
+  "missing_record_ids": [],
+  "missing_table_ids": [],
+  "broken_parent_links": [],
+  "output_path": "C:\\Users\\3189885\\Documents\\Credit-Memo-Copy\\chunking-test-output\\goodwin-sample\\chunking_output.json"
+}
